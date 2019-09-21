@@ -1,0 +1,8 @@
+@echo off
+reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce" /v "DP" /t REG_SZ /d "cmd.exe /c Reg add \"HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment\" /v Desktop /t REG_SZ /d \"%%systemdrive%%\Users\%%USERNAME%%\Desktop\" /f" /f
+reg query "HKLM\SYSTEM\Setup" /v "Runnum">nul 2>nul || reg add "HKLM\SYSTEM\Setup" /v "Runnum" /t REG_SZ /d "1"
+for /f "tokens=3 delims= " %%i in ('reg query "HKLM\SYSTEM\Setup" /v "Runnum"') do (set "Runnum=%%i")
+set /a Runnum+=1
+reg add "HKLM\SYSTEM\Setup" /v "Runnum" /t REG_SZ /d "%Runnum%" /f
+del /f /q %0
+exit
