@@ -1,0 +1,141 @@
+@echo off&mode con COLS=68 LINES=22 >nul 2>nul&color 0A&setlocal EnableDelayedExpansion&pushd "%~dp0"
+title Microsoft windows install&call :ZH
+if exist "!Windir!\System32\chcp.com" chcp|find "936">nul||chcp 437>nul&&call :EN
+"!Windir!\System32\FLTMC.exe">nul 2>nul||cls&&echo.&&echo.!T15!...&&pause>nul&&goto :End
+set "bd=bcdedit"&set "bs=bcdedit /set"&set "WS=!Windir!\System32"&set "WT=!Windir!\Temp\"&set "AC="!WT!aria2c.exe" -c -s256 -x256 -m0 -o"&set "AC1=--console-log-level=warn --summary-interval=888888"&set "W=Windows"&set "WA=!WS!\config\AutoSys"
+if exist "!WS!\find.exe" (set "Find=find") else set "Find=findstr"
+set "zh-cn_x64=c16e22d4-7faa-4d7e-8d15-e3730219827c"
+set "zh-cn_x86=73a9cc2d-276b-4131-920d-0badc353f690"
+set "zh-tw_x64=d733f146-4465-49ab-ad6c-646211a48921"
+set "zh-tw_x86=06365d73-0aa6-4af5-8ff4-fd4416f9c347"
+set "en-us_x64=db8dbe0f-9139-4dbe-b8d1-896b51d04b34"
+set "en-us_x86=4ae8c2ea-e859-4fb3-b4fb-bc33c1aa7cae"
+set "ja-jp_x64=2b9007e4-669e-45e9-b5d0-d7101bd6e225"
+set "ja-jp_x86=50a8f0e3-51e0-4fc9-be33-b55f5427d4d1"
+set "ko-kr_x64=3ad7411a-1112-4472-97ab-bff0396f975a"
+set "ko-kr_x86=c88611eb-2efa-4d1d-a86f-095bd742db7b"
+set "L=zh-CN"&set "X=64"&set "X1=64"&set "U="&set "CS="&set "CS=%~1%~2%~3"
+if not defined CS goto :Begin
+echo "!CS!"|Find /i "32">nul 2>nul&&set "X=86"&&set "X1=32"
+for %%i in (zh-CN zh-TW en-US ja-JP ko-KR) do echo "!CS!"|!Find! /i "%%i">nul 2>nul&&set "L=%%i"&&goto :Next
+:Next
+if defined CS set "U=!CS:32=!"
+if defined U set "U=!U:64=!"
+if defined U set "U=!U:%L%=!"
+:Begin
+cls&echo.
+echo.  [1]  !W! 7   !T16! 64!T6! !L!
+echo.
+echo.  [2]  !W! 8.1 !T9! 64!T6! !L!
+echo.
+echo.  [3]  !W! 10  !T9! !X1!!T6! !L! 21H2
+echo.
+echo.  [4]  !W! 10  !T10! !X1!!T6! !L! 21H2
+echo.
+echo.  [5]  !W! 10  !T11! !X1!!T6! !L! 21H2
+echo.
+echo.  [6]  !W! 11  !T9! 64!T6! !L! !T18!
+echo.
+echo.  [7]  !W! 11  !T10! 64!T6! !L! !T18! 
+echo.
+echo.  [8]  !W! 11  !T11! 64!T6! !L! !T18!
+echo.
+echo.  [X]  !T12!
+echo.
+set "Name=!W!10_21h2_x!X!_!L!.esd"
+set "URL=http://dl.delivery.mp.microsoft.com/filestreamingservice/files/!%L%_x%X%!/19044.1288.211006-0501.21h2_release_svc_refresh_CLIENTBUSINESS_VOL_x!X!FRE_!L!.esd"
+choice /? >nul 2>nul||(
+	set /p "errorlevel=_______!T5!:"
+	if /i "!errorlevel!"=="x" goto :End
+	!Find! /i "[!errorlevel!]" "%0" >nul 2>nul||(cls&echo.&echo.!T7!"!errorlevel!"!T8!...&pause>nul&goto :Begin)
+)
+choice /? >nul 2>nul&&choice /c:12345678X /n /m "_______!T5!:"
+set "CH=!errorlevel!"
+if "!CH!"=="9" goto :End
+if !CH! GTR 5 set "Name=!W!11_x!X!_!L!.esd"&&set "URL=http://dl.delivery.mp.microsoft.com/filestreamingservice/files/1bee5628-e6f2-439d-9087-05136d3f6710/22000.194.210913-1444.co_release_svc_refresh_CLIENTBUSINESS_VOL_x!X!FRE_zh-CN.esd"
+if "!CH!"=="8" set "I=5"
+if "!CH!"=="7" set "I=4"
+if "!CH!"=="6" set "I=6"
+if "!CH!"=="5" set "I=5"
+if "!CH!"=="4" set "I=4"
+if "!CH!"=="3" set "I=6"
+if "!CH!"=="2" set "I=1"&&set "Name=!W!8.1-x!X!.esd"&&set "URL=http://vg.dl.ws.microsoft.com/dl/content/c/updt/2015/01/9600.17053.winblue_refresh.141120-0031_x64fre_client_core_zh-cn-ir5_ccra_x64frer_zh-cn_esd_c8e8bf1cb11a61cba40a4ebcbbb5bf8cc49426bd.esd"
+if "!CH!"=="1" set "I=1"&&set "Name=!W!7-x!X!-Ultimate.esd"&&set "URL=http://www.win11.link/7"&&ver|!Find! /i "6.1." >nul 2>nul||(cls&echo.&echo.          !T17!...&pause>nul&goto :Begin)
+call :TP
+cls&echo.&echo.          !T3!...
+md "!WT!\aria2c" >nul 2>nul&rd /s /q "!WT!aria2c.exe" >nul 2>nul
+if not exist "!WT!aria2c.exe" call :Bt "aria2c.tmp" "aria2c.tmp" "!WT!"
+if exist "!WT!aria2c.tmp" ren "!WT!aria2c.tmp" "aria2c.exe" >nul
+cls&echo.&echo.             !T1!...&echo.
+!AC! "!Name!" !AC1! "!URL!" -d "!TP!"
+if not "!errorlevel!"=="0" (cls&echo.&echo.             !T2!...&pause>nul&goto :End)
+cls&echo.&echo.             !T1!...&echo.
+!AC! "BOOT.WIM" !AC1! "http://www.win11.link/b" -d "!Windir!\Temp"
+if not "!errorlevel!"=="0" (cls&echo.&echo.             !T2!...&pause>nul&goto :End)
+set "BcdID=!random:~0,3!!random:~0,2!"&set "BcdID1=fff-9d96-11de-8e71-fffffffffff"&set "BN=Microsoft !W! install"
+set "id1={!BcdID!!BcdID1!a}"
+set "id2={!BcdID!!BcdID1!b}"
+bcdedit /default {current} >nul 2>nul
+for /f "tokens=2" %%i in ('!bd!^|!Find! /i "!BcdID1!a"') do !bd! /delete %%i /cleanup >nul 2>nul
+!bd! /create !id2! /d "!BN!" /device >nul
+!bs! !id2! ramdisksdidevice partition=!SystemDrive! >nul
+if exist "!WS!\boot.sdi" (
+	!bs! !id2! ramdisksdipath "\!W!\System32\boot.sdi" >nul
+) else if exist "!Windir!\SysWOW64\boot.sdi" (
+	!bs! !id2! ramdisksdipath "\!W!\SysWOW64\boot.sdi" >nul
+) else (
+	call :Bt "boot.sdi" "boot.sdi" "!WT!"
+	!bs! !id2! ramdisksdipath "\!W!\Temp\boot.sdi" >nul
+)
+!bd! /create !id1! /d "!BN!" /application osloader >nul
+!bs! !id1! device ramdisk="[!SystemDrive!]\!W!\Temp\BOOT.WIM",!id2! >nul
+!bs! !id1! osdevice ramdisk="[!SystemDrive!]\!W!\Temp\BOOT.WIM",!id2! >nul
+!bs! !id1! path \!W!\system32\boot\winload.exe >nul
+!bd!|!Find! /i "winload.efi" >nul&&!bs! !id1! path \!W!\system32\boot\winload.efi >nul
+!bs! !id1! description "!BN!" >nul
+!bs! !id1! locale zh-CN >nul
+!bs! !id1! inherit {bootloadersettings} >nul
+!bs! !id1! systemroot \!W! >nul
+!bs! !id1! detecthal Yes >nul
+!bs! !id1! winpe Yes >nul
+!bs! !id1! ems no >nul
+!bd! /displayorder !id1! /addlast >nul
+!bd! /default !id1! >nul
+!bd! /timeout 3 >nul
+echo SysFile=!TP!\!Name!>"!WA!"
+echo Index=!I!>>"!WA!"
+if /i "!U!"=="a" echo Unattend=a>>"!WA!"
+if /i "!U!"=="u" echo Unattend=u>>"!WA!"
+echo Language=!L!>>"!WA!"
+if !cSpace! lss 12 echo Format=Yes>>"!WA!"
+cls&echo.&echo.              !T4!...&pause>nul&goto :End
+:Bt
+bitsadmin /transfer "" http://win11.link/a/%~1 %~3\%~2 >nul 2>nul
+goto :eof
+:TP
+for %%i in (C D E F G H I J K L M N O P Q R S T U V W Y) do (
+	if exist %%i: (
+		echo 1 >%%i:\CMDPE.COM
+		for /f "skip=7 tokens=3" %%j in ('dir /-c /w %%i:\CMDPE.COM') do (
+			del /f /q /a %%i:\CMDPE.COM >nul
+			set "Space=%%j"
+			set "Space=!Space:~0,-9!"
+			if /i "%%i:"=="!SystemDrive!" (
+				set "cSpace=!Space!"
+				if !Space! lss 16 set "Space="
+			)
+			if !space! gtr !MaxSpace! set "MaxSpace=!Space!"&&set "TP=%%i:"
+		)
+	)
+)
+if not defined TP (cls&echo.&echo.!T14!...&pause>nul&goto :End)
+if !MaxSpace! lss 5 (cls&echo.&echo.!T13!...&pause>nul&goto :End)
+goto :eof
+:ZH
+set "ET=请按任意键退出"&set "T1=正在下载系统镜像中，请稍等"&set "T2=下载失败，!ET!"&set "T3=正在解析镜像下载地址，请稍等"&set "T4=准备完成，请重启电脑"&set "T5=请输入选择"&set "T6=位"&set "T7=没有此"&set "T8=选项，请安任意键返回重新输入"&set "T9=专业版"&set "T10=教育版"&set "T11=企业版"&set "T12=退出"&set "T13=找不到可用空间大于4GB的磁盘作为下载存储盘，!ET!"&set "T14=找不到可用的磁盘作为下载存储盘，!ET!"&set "T15=请以管理员身份运行CMD命令提示符，!ET!"&set "T16=旗舰版"&set "T17=此电脑不建议安装!W!7，请按任意键返回"&set "T18=正式版"
+goto :eof
+:EN
+set "ET= Press anykey to exit"&set "T1=Downloading image, Please wait"&set "T2=Download failed,!ET!"&set "T3=Parsing image download link, Please wait"&set "T4=Ready, Please restart"&set "T5=Please choose"&set "T6=-bit"&set "T7=No"&set "T8=this Option, Please press anykey to return"&set "T9=Pro"&set "T10=Education"&set "T11=Enterprise"&set "T12=Exit"&set "T13=Cannot find a disk with free space greater than 4GB as a download storage disk,!ET!"&set "T14=Cannot find a download available disk storage disk,!ET!"&set "T15=Please run as administrator CMD,!ET!"&set "T16=Ultimate"&set "T17=This computer does not recommend installing !W!7,Please press anykey to return"
+goto :eof
+:End
+cls&del 1.cmd 2>nul&Exit
